@@ -68,7 +68,7 @@ public class BasketServiceImpl implements BasketService {
         List<BasketItem> basketItems = basket.getBasketItems();
         BasketItem basketItem = findBasketItem(basketItems, product.getId());
 
-        if(product.getUnitsInStock() >= addBasketItemDto.getQuantity()) {
+        if (product.getUnitsInStock() >= addBasketItemDto.getQuantity()) {
             if (basketItems == null) {
                 basketItems = new ArrayList<>();
 
@@ -108,18 +108,18 @@ public class BasketServiceImpl implements BasketService {
     }
 
     @Override
+    @Transactional
     public ApiResponse removeProductFromBasket(RemoveBasketItemDto removeBasketItemDto) {
         Basket basket = basketRepository.findById(removeBasketItemDto.getBasketId())
                 .orElseThrow(() -> new ResourceNotFoundException("Basket not found with " + removeBasketItemDto.getBasketId() + " id"));
         Product product = productRepository.findById(removeBasketItemDto.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Basket not found with " + removeBasketItemDto.getBasketId() + " id"));
-        
-        var basketItem = basket.getBasketItems().stream()
-        .filter(b -> !Objects.equals(b.getProduct(), product))
-        .collect(Collectors.toList());
-               
 
-        basket.setBasketItems(basketItem);
+        var basketItems = basket.getBasketItems().stream()
+                .filter(b -> !Objects.equals(b.getProduct(), product))
+                .collect(Collectors.toList());
+
+        basket.setBasketItems(basketItems);
         Double totalPrice = totalPrice(basket.getBasketItems());
         Integer totalItemsCount = totalItemsCounter(basket.getBasketItems());
 
@@ -128,35 +128,24 @@ public class BasketServiceImpl implements BasketService {
         basketRepository.save(basket);
 
         basketItemRepository.deleteByProductId(removeBasketItemDto.getProductId());
-           
-        return new ApiResponse("Product removed from basket successfully", true); 
+        return new ApiResponse("Product removed from basket successfully", true);
     }
 
     @Override
+    @Transactional
     public ApiResponse clearBasket(Long basketId) {
         Basket basket = basketRepository.findById(basketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Basket not found with " + basketId + " id"));
 
-        List<BasketItem> basketItems = basket.getBasketItems();
-
-        for(BasketItem item : basketItems) {
-            basketItems.remove(item);
-            basketItemRepository.delete(item);
-        }
-
-        basket.setBasketItems(basketItems);
-        basket.setTotalItemsCount(0);
-        basket.setTotalPrice(0.00);
-
-        basketRepository.save(basket);
+        basketItemRepository.deleteAllByBasketId(basket.getId());
 
         return new ApiResponse("Basket cleared successfully", true);
     }
 
     private BasketItem createNewBasketItem(Integer quantity,
-                                                  Product product,
-                                                  Basket basket,
-                                                  List<BasketItem> basketItems) {
+                                           Product product,
+                                           Basket basket,
+                                           List<BasketItem> basketItems) {
         BasketItem basketItem;
 
         basketItem = new BasketItem();
@@ -184,20 +173,20 @@ public class BasketServiceImpl implements BasketService {
         return basketItem;
     }
 
-    private Double totalPrice(List<BasketItem> basketItems){
+    private Double totalPrice(List<BasketItem> basketItems) {
         Double totalPrice = 0.0;
 
-        for(BasketItem item : basketItems){
+        for (BasketItem item : basketItems) {
             totalPrice += item.getPrice();
         }
 
         return totalPrice;
     }
 
-    private Integer totalItemsCounter(List<BasketItem> basketItems){
+    private Integer totalItemsCounter(List<BasketItem> basketItems) {
         Integer totalItemsCount = 0;
 
-        for(BasketItem item : basketItems){
+        for (BasketItem item : basketItems) {
             totalItemsCount += item.getQuantity();
         }
 
