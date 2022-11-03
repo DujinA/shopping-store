@@ -9,9 +9,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BasketItemRepository extends JpaRepository<BasketItem, Long> {
-
     @Modifying
-    @Query( value = "delete from basket_item where product_id = :id", nativeQuery = true)
+    @Query(value = "delete from basket_item where product_id = :id", nativeQuery = true)
     void deleteByProductId(@Param("id") Long productId);
 
     @Modifying

@@ -1,16 +1,24 @@
 package com.consulteer.shoppingstore.services.impl;
 
 import com.consulteer.shoppingstore.domain.Basket;
+import com.consulteer.shoppingstore.domain.Role;
 import com.consulteer.shoppingstore.domain.User;
+import com.consulteer.shoppingstore.dtos.CreateUserDto;
 import com.consulteer.shoppingstore.dtos.UserDto;
 import com.consulteer.shoppingstore.exceptions.ResourceNotFoundException;
 import com.consulteer.shoppingstore.mapper.UserMapper;
 import com.consulteer.shoppingstore.payloads.ApiResponse;
+import com.consulteer.shoppingstore.repositories.RoleRepository;
 import com.consulteer.shoppingstore.repositories.UserRepository;
 import com.consulteer.shoppingstore.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,7 +26,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<UserDto> getAllUsers() {
@@ -41,8 +51,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto addUser(UserDto userDto) {
-        User user = userMapper.convert(userDto);
+    public UserDto createUser(CreateUserDto createUserDto) {
+        User user = userMapper.convertCreatedUser(createUserDto);
+        Role role = roleRepository.findByName(createUserDto.roleName())
+                .orElseThrow(() -> new ResourceNotFoundException("Role does not exist"));
+
+        user.setRole(role);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         createBasketForUser(user);
         userRepository.save(user);
@@ -69,10 +84,10 @@ public class UserServiceImpl implements UserService {
     }
 
     private static void updateBasicFields(UserDto userDto, User updatedUser) {
-        updatedUser.setUsername(userDto.getUsername());
-        updatedUser.setFirstName(userDto.getFirstName());
-        updatedUser.setLastName(userDto.getLastName());
-        updatedUser.setEmail(userDto.getEmail());
+        updatedUser.setUsername(userDto.username());
+        updatedUser.setFirstName(userDto.firstName());
+        updatedUser.setLastName(userDto.lastName());
+        updatedUser.setEmail(userDto.email());
     }
 
     @Override
@@ -81,5 +96,18 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
 
         return new ApiResponse("User deleted successfully", true);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(user.getRole().getName()));
+
+        return new org.springframework.security.core.userdetails.User(user.getUsername(),
+                user.getPassword(),
+                authorities);
     }
 }

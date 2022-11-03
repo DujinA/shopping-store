@@ -59,10 +59,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private static void updateBasicFields(ProductDto productDto, Product updatedProduct) {
-        updatedProduct.setName(productDto.getName());
-        updatedProduct.setDescription(productDto.getDescription());
-        updatedProduct.setUnitPrice(productDto.getUnitPrice());
-        updatedProduct.setUnitsInStock(productDto.getUnitsInStock());
+        updatedProduct.setName(productDto.name());
+        updatedProduct.setDescription(productDto.description());
+        updatedProduct.setUnitPrice(productDto.unitPrice());
+        updatedProduct.setUnitsInStock(productDto.unitsInStock());
     }
 
     @Override

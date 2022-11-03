@@ -59,34 +59,34 @@ public class BasketServiceImpl implements BasketService {
 
     @Override
     public ApiResponse addProductToBasket(AddBasketItemDto addBasketItemDto) {
-        Product product = productRepository.findById(addBasketItemDto.getProductId())
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with " + addBasketItemDto.getProductId() + " id"));
+        Product product = productRepository.findById(addBasketItemDto.productId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with " + addBasketItemDto.productId() + " id"));
 
-        Basket basket = basketRepository.findById(addBasketItemDto.getBasketId())
-                .orElseThrow(() -> new ResourceNotFoundException("Basket not found with " + addBasketItemDto.getBasketId() + " id"));
+        Basket basket = basketRepository.findById(addBasketItemDto.basketId())
+                .orElseThrow(() -> new ResourceNotFoundException("Basket not found with " + addBasketItemDto.basketId() + " id"));
 
         List<BasketItem> basketItems = basket.getBasketItems();
         BasketItem basketItem = findBasketItem(basketItems, product.getId());
 
-        if (product.getUnitsInStock() >= addBasketItemDto.getQuantity()) {
+        if (product.getUnitsInStock() >= addBasketItemDto.quantity()) {
             if (basketItems == null) {
                 basketItems = new ArrayList<>();
 
                 basketItem = createNewBasketItem(
-                        addBasketItemDto.getQuantity(),
+                        addBasketItemDto.quantity(),
                         product,
                         basket,
                         basketItems);
             } else {
                 if (basketItem == null) {
                     basketItem = createNewBasketItem(
-                            addBasketItemDto.getQuantity(),
+                            addBasketItemDto.quantity(),
                             product,
                             basket,
                             basketItems);
                 } else {
-                    basketItem.setPrice(basketItem.getPrice() + product.getUnitPrice() * addBasketItemDto.getQuantity());
-                    basketItem.setQuantity(basketItem.getQuantity() + addBasketItemDto.getQuantity());
+                    basketItem.setPrice(basketItem.getPrice() + product.getUnitPrice() * addBasketItemDto.quantity());
+                    basketItem.setQuantity(basketItem.getQuantity() + addBasketItemDto.quantity());
                 }
             }
             basketItemRepository.save(basketItem);
@@ -110,10 +110,10 @@ public class BasketServiceImpl implements BasketService {
     @Override
     @Transactional
     public ApiResponse removeProductFromBasket(RemoveBasketItemDto removeBasketItemDto) {
-        Basket basket = basketRepository.findById(removeBasketItemDto.getBasketId())
-                .orElseThrow(() -> new ResourceNotFoundException("Basket not found with " + removeBasketItemDto.getBasketId() + " id"));
-        Product product = productRepository.findById(removeBasketItemDto.getProductId())
-                .orElseThrow(() -> new ResourceNotFoundException("Basket not found with " + removeBasketItemDto.getBasketId() + " id"));
+        Basket basket = basketRepository.findById(removeBasketItemDto.basketId())
+                .orElseThrow(() -> new ResourceNotFoundException("Basket not found with " + removeBasketItemDto.basketId() + " id"));
+        Product product = productRepository.findById(removeBasketItemDto.productId())
+                .orElseThrow(() -> new ResourceNotFoundException("Basket not found with " + removeBasketItemDto.basketId() + " id"));
 
         var basketItems = basket.getBasketItems().stream()
                 .filter(b -> !Objects.equals(b.getProduct(), product))
@@ -127,7 +127,7 @@ public class BasketServiceImpl implements BasketService {
         basket.setTotalItemsCount(totalItemsCount);
         basketRepository.save(basket);
 
-        basketItemRepository.deleteByProductId(removeBasketItemDto.getProductId());
+        basketItemRepository.deleteByProductId(removeBasketItemDto.productId());
         return new ApiResponse("Product removed from basket successfully", true);
     }
 
@@ -138,6 +138,10 @@ public class BasketServiceImpl implements BasketService {
                 .orElseThrow(() -> new ResourceNotFoundException("Basket not found with " + basketId + " id"));
 
         basketItemRepository.deleteAllByBasketId(basket.getId());
+
+        basket.setTotalPrice(0.00);
+        basket.setTotalItemsCount(0);
+        basketRepository.save(basket);
 
         return new ApiResponse("Basket cleared successfully", true);
     }

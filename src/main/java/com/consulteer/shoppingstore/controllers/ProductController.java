@@ -6,7 +6,15 @@ import com.consulteer.shoppingstore.services.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -16,7 +24,7 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
@@ -26,16 +34,19 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductById(productId));
     }
 
+    @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/")
     public ResponseEntity<ProductDto> addProduct(@RequestBody ProductDto productDto) {
         return new ResponseEntity<>(productService.addProduct(productDto), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('MANAGER')")
     @PutMapping("/{product-id}")
     public ResponseEntity<ProductDto> updateProduct(@RequestBody ProductDto productDto, @PathVariable("product-id") Long productId) {
         return ResponseEntity.ok(productService.updateProduct(productDto, productId));
     }
 
+    @PreAuthorize("hasRole('MANAGER')")
     @DeleteMapping("/{product-id}")
     public ResponseEntity<ApiResponse> deleteProduct(@PathVariable("product-id") Long productId) {
         return new ResponseEntity<>(productService.deleteProduct(productId), HttpStatus.OK);

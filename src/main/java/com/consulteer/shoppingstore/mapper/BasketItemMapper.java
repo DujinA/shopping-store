@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 @Component
 public class BasketItemMapper {
-
     public BasketItemDto convert(BasketItem basketItem) {
         return new BasketItemDto(basketItem.getName(),
                 basketItem.getPrice(),
