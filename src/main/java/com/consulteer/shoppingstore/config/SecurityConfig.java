@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
@@ -31,6 +32,8 @@ public class SecurityConfig {
 
         return http
                 .csrf(csrf -> csrf.disable())
+                .sessionManagement().sessionCreationPolicy(STATELESS)
+                .and()
                 .authorizeRequests(auth -> {
                     auth.antMatchers("/api/v1/login").permitAll();
                     auth.antMatchers(GET, "/api/v1/products/**").permitAll();
