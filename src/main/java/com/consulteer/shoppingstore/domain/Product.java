@@ -12,8 +12,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.Set;
 
 @Entity
 @Table(name = "product")
@@ -32,8 +33,8 @@ public class Product {
     @Column(name = "units_in_stock")
     private Integer unitsInStock;
     @JsonManagedReference
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
-    private BasketItem basketItem;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private Set<BasketItem> basketItems;
 
     public Product(String name,
                    String description,

@@ -7,6 +7,7 @@ import com.consulteer.shoppingstore.dtos.BasketDto;
 import com.consulteer.shoppingstore.dtos.AddBasketItemDto;
 import com.consulteer.shoppingstore.dtos.BasketItemDto;
 import com.consulteer.shoppingstore.dtos.RemoveBasketItemDto;
+import com.consulteer.shoppingstore.exceptions.BadRequestException;
 import com.consulteer.shoppingstore.exceptions.ResourceNotFoundException;
 import com.consulteer.shoppingstore.mapper.BasketItemMapper;
 import com.consulteer.shoppingstore.payloads.ApiResponse;
@@ -18,10 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -66,45 +64,40 @@ public class BasketServiceImpl implements BasketService {
                 .orElseThrow(() -> new ResourceNotFoundException("Basket not found with " + addBasketItemDto.basketId() + " id"));
 
         List<BasketItem> basketItems = basket.getBasketItems();
-        BasketItem basketItem = findBasketItem(basketItems, product.getId());
 
-        if (product.getUnitsInStock() >= addBasketItemDto.quantity()) {
-            if (basketItems == null) {
-                basketItems = new ArrayList<>();
+        basketItems.stream()
+                .filter(basketItem -> basketItem.getProduct().equals(product))
+                .findFirst()
+                .ifPresentOrElse(basketItem -> {
+                    if (basketItem.getProduct().getUnitsInStock() < addBasketItemDto.quantity() + basketItem.getQuantity())
+                        throw new BadRequestException("Product out of stock!");
 
-                basketItem = createNewBasketItem(
-                        addBasketItemDto.quantity(),
-                        product,
-                        basket,
-                        basketItems);
-            } else {
-                if (basketItem == null) {
-                    basketItem = createNewBasketItem(
+                    basketItem.setPrice(basketItem.getPrice() + product.getUnitPrice() * addBasketItemDto.quantity());
+                    basketItem.setQuantity(basketItem.getQuantity() + addBasketItemDto.quantity());
+
+                    basketItemRepository.save(basketItem);
+                }, () -> {
+                    if (product.getUnitsInStock() < addBasketItemDto.quantity())
+                        throw new BadRequestException("Product out of stock!");
+
+                    BasketItem basketItem = createNewBasketItem(
                             addBasketItemDto.quantity(),
                             product,
                             basket,
                             basketItems);
-                } else {
-                    basketItem.setPrice(basketItem.getPrice() + product.getUnitPrice() * addBasketItemDto.quantity());
-                    basketItem.setQuantity(basketItem.getQuantity() + addBasketItemDto.quantity());
-                }
-            }
-            basketItemRepository.save(basketItem);
 
-            basket.setBasketItems(basketItems);
+                    basketItemRepository.save(basketItem);
+                });
 
-            Double totalPrice = totalPrice(basket.getBasketItems());
-            Integer totalItemsCount = totalItemsCounter(basket.getBasketItems());
+        Double totalPrice = totalPrice(basket.getBasketItems());
+        Integer totalItemsCount = totalItemsCounter(basket.getBasketItems());
 
-            basket.setTotalPrice(totalPrice);
-            basket.setTotalItemsCount(totalItemsCount);
+        basket.setTotalPrice(totalPrice);
+        basket.setTotalItemsCount(totalItemsCount);
 
-            basketRepository.save(basket);
+        basketRepository.save(basket);
 
-            return new ApiResponse("Product added to basket successfully", true);
-        }
-
-        return new ApiResponse("Failed attempt to add product to basket", false);
+        return new ApiResponse("Product added to basket successfully", true);
     }
 
     @Override
@@ -112,22 +105,28 @@ public class BasketServiceImpl implements BasketService {
     public ApiResponse removeProductFromBasket(RemoveBasketItemDto removeBasketItemDto) {
         Basket basket = basketRepository.findById(removeBasketItemDto.basketId())
                 .orElseThrow(() -> new ResourceNotFoundException("Basket not found with " + removeBasketItemDto.basketId() + " id"));
-        Product product = productRepository.findById(removeBasketItemDto.productId())
-                .orElseThrow(() -> new ResourceNotFoundException("Basket not found with " + removeBasketItemDto.basketId() + " id"));
 
-        var basketItems = basket.getBasketItems().stream()
-                .filter(b -> !Objects.equals(b.getProduct(), product))
-                .collect(Collectors.toList());
+        List<BasketItem> basketItems = basket.getBasketItems();
 
-        basket.setBasketItems(basketItems);
-        Double totalPrice = totalPrice(basket.getBasketItems());
-        Integer totalItemsCount = totalItemsCounter(basket.getBasketItems());
+        basketItems.stream()
+                .filter(basketItem -> basketItem.getProduct().getId().equals(removeBasketItemDto.productId()))
+                .findFirst()
+                .ifPresentOrElse(basketItem -> {
+                            basketItems.remove(basketItem);
+                            basketItemRepository.delete(basketItem);
 
-        basket.setTotalPrice(totalPrice);
-        basket.setTotalItemsCount(totalItemsCount);
-        basketRepository.save(basket);
+                            Double totalPrice = totalPrice(basket.getBasketItems());
+                            Integer totalItemsCount = totalItemsCounter(basket.getBasketItems());
 
-        basketItemRepository.deleteByProductId(removeBasketItemDto.productId());
+                            basket.setTotalPrice(totalPrice);
+                            basket.setTotalItemsCount(totalItemsCount);
+                            basketRepository.save(basket);
+
+                        },
+                        () -> {
+                            throw new BadRequestException("Product is not in the basket");
+                        });
+
         return new ApiResponse("Product removed from basket successfully", true);
     }
 
@@ -158,22 +157,9 @@ public class BasketServiceImpl implements BasketService {
         basketItem.setQuantity(quantity);
         basketItem.setProduct(product);
         basketItem.setBasket(basket);
+
         basketItems.add(basketItem);
 
-        return basketItem;
-    }
-
-    private BasketItem findBasketItem(List<BasketItem> basketItems, Long productId) {
-        if (basketItems == null) {
-            return null;
-        }
-        BasketItem basketItem = null;
-
-        for (BasketItem item : basketItems) {
-            if (Objects.equals(item.getProduct().getId(), productId)) {
-                basketItem = item;
-            }
-        }
         return basketItem;
     }
 
