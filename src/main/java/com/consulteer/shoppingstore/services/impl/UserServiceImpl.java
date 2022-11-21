@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -51,6 +53,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto createUser(CreateUserDto createUserDto) {
         User user = userMapper.convertCreatedUser(createUserDto);
         Role role = roleRepository.findByName(createUserDto.roleName())
@@ -74,6 +77,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto updateUserInfo(UserDto userDto, Long userId) {
         User updatedUser = findUserById(userId);
 
@@ -91,6 +95,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public ApiResponse deleteUser(Long userId) {
         User user = findUserById(userId);
         userRepository.delete(user);

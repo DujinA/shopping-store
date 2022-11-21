@@ -2,6 +2,7 @@ package com.consulteer.shoppingstore.controllers;
 
 import com.consulteer.shoppingstore.dtos.BasketDto;
 import com.consulteer.shoppingstore.dtos.AddBasketItemDto;
+import com.consulteer.shoppingstore.dtos.BuyProductsDto;
 import com.consulteer.shoppingstore.dtos.RemoveBasketItemDto;
 import com.consulteer.shoppingstore.payloads.ApiResponse;
 import com.consulteer.shoppingstore.services.BasketService;
@@ -29,7 +30,7 @@ public class BasketController {
         return ResponseEntity.ok(basketService.getBasketById(basketId));
     }
 
-    @GetMapping("/users/{user-id}")
+    @GetMapping("/user/{user-id}")
     public ResponseEntity<BasketDto> getBasketByUserId(@PathVariable("user-id") Long userId) {
         return ResponseEntity.ok(basketService.getBasketByUserId(userId));
     }
@@ -39,7 +40,7 @@ public class BasketController {
         return new ResponseEntity<>(basketService.addProductToBasket(addBasketItemDto), HttpStatus.OK);
     }
 
-    @PutMapping("/removeProduct")
+    @PutMapping("/remove")
     public ResponseEntity<ApiResponse> removeProductFromBasket(@RequestBody RemoveBasketItemDto removeBasketItemDto) {
         return new ResponseEntity<>(basketService.removeProductFromBasket(removeBasketItemDto), HttpStatus.OK);
     }
@@ -47,5 +48,10 @@ public class BasketController {
     @PutMapping("/clear/{basket-id}")
     public ResponseEntity<ApiResponse> clearBasket(@PathVariable("basket-id") Long basketId) {
         return new ResponseEntity<>(basketService.clearBasket(basketId), HttpStatus.OK);
+    }
+
+    @PostMapping("/buy")
+    public ResponseEntity<ApiResponse> buyProducts(@RequestBody BuyProductsDto buyProductsDto) {
+        return new ResponseEntity<>(basketService.buyProducts(buyProductsDto), HttpStatus.OK);
     }
 }

@@ -13,7 +13,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -40,7 +39,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
         User user = (User) authentication.getPrincipal();
         Algorithm algorithm = Algorithm.HMAC256(jwtSecretKey.getBytes());
 

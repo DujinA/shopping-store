@@ -15,12 +15,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "basket_item")
+@Table(name = "order_item")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class BasketItem {
+public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,8 +33,6 @@ public class BasketItem {
     private Product product;
     @JsonBackReference
     @ManyToOne
-    @JoinColumn(name = "basket_id", referencedColumnName = "id")
-    private Basket basket;
-    
-    
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
+    private Order order;
 }

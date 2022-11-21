@@ -1,7 +1,10 @@
 package com.consulteer.shoppingstore.controllers;
 
 import com.consulteer.shoppingstore.dtos.ProductDto;
+import com.consulteer.shoppingstore.dtos.ReportDto;
+import com.consulteer.shoppingstore.dtos.TopProductsDto;
 import com.consulteer.shoppingstore.payloads.ApiResponse;
+import com.consulteer.shoppingstore.repositories.ProductRepository;
 import com.consulteer.shoppingstore.services.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
+    private final ProductRepository productRepository;
 
     @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProducts() {
@@ -35,7 +39,7 @@ public class ProductController {
     }
 
     @PreAuthorize("hasRole('MANAGER')")
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<ProductDto> addProduct(@RequestBody ProductDto productDto) {
         return new ResponseEntity<>(productService.addProduct(productDto), HttpStatus.CREATED);
     }
@@ -52,4 +56,19 @@ public class ProductController {
         return new ResponseEntity<>(productService.deleteProduct(productId), HttpStatus.OK);
     }
 
+    @GetMapping("/newest")
+    public ResponseEntity<List<ProductDto>> findNewProducts() {
+        return new ResponseEntity<>(productService.getNewProducts(), HttpStatus.OK);
+    }
+
+    @GetMapping("/top")
+    public ResponseEntity<List<TopProductsDto>> findTopProducts() {
+        return ResponseEntity.ok(productService.getTopProducts());
+    }
+
+    @PreAuthorize("hasRole('MANAGER')")
+    @GetMapping("/{product-id}/report")
+    public ResponseEntity<ReportDto> findReport(@PathVariable("product-id") Long productId) {
+        return ResponseEntity.ok(productService.getReport(productId));
+    }
 }

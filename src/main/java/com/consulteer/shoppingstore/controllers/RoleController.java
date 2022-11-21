@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoleController {
     private final RoleService roleService;
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<ApiResponse> addRole(@RequestBody RoleDto roleDto) {
         return new ResponseEntity<>(roleService.addRole(roleDto), HttpStatus.CREATED);
     }

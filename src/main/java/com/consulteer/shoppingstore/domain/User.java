@@ -16,8 +16,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import java.util.Set;
 
 @Entity
 @Table(name = "user")
@@ -45,6 +47,9 @@ public class User {
     @JsonManagedReference
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Basket basket;
+    @JsonManagedReference
+    @OneToMany(mappedBy = "user", cascade = CascadeType.DETACH)
+    private Set<Order> orders;
 
     public User(String username,
                 String firstName,

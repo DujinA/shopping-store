@@ -2,6 +2,7 @@ package com.consulteer.shoppingstore.services;
 
 import com.consulteer.shoppingstore.dtos.BasketDto;
 import com.consulteer.shoppingstore.dtos.AddBasketItemDto;
+import com.consulteer.shoppingstore.dtos.BuyProductsDto;
 import com.consulteer.shoppingstore.dtos.RemoveBasketItemDto;
 import com.consulteer.shoppingstore.payloads.ApiResponse;
 
@@ -16,4 +17,5 @@ public interface BasketService {
 
     ApiResponse clearBasket(Long basketId);
 
+    ApiResponse buyProducts(BuyProductsDto buyProductsDto);
 }

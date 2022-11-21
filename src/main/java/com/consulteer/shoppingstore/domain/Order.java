@@ -1,5 +1,6 @@
 package com.consulteer.shoppingstore.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,40 +14,37 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 @Entity
-@Table(name = "product")
+@Table(name = "orders")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class Product {
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private String description;
-    @Column(name = "price")
-    private Double unitPrice;
-    @Column(name = "units_in_stock")
-    private Integer unitsInStock;
+    @Column(name = "total_price")
+    private Double totalPrice;
+    @Column(name = "total_items_count")
+    private Integer totalItemsCount;
+    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
     @JsonManagedReference
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private Set<BasketItem> basketItems;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems;
     @CreationTimestamp
     private Date createdAt;
-
-    public Product(String name,
-                   String description,
-                   Double unitPrice,
-                   Integer unitsInStock) {
-        this.name = name;
-        this.description = description;
-        this.unitPrice = unitPrice;
-        this.unitsInStock = unitsInStock;
-    }
+    private String country;
+    private String city;
+    private String address;
 }
