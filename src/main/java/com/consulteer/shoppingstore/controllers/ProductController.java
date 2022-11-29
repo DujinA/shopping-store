@@ -2,7 +2,7 @@ package com.consulteer.shoppingstore.controllers;
 
 import com.consulteer.shoppingstore.dtos.ProductDto;
 import com.consulteer.shoppingstore.dtos.ReportDto;
-import com.consulteer.shoppingstore.dtos.TopProductsDto;
+import com.consulteer.shoppingstore.dtos.TopProductDto;
 import com.consulteer.shoppingstore.payloads.ApiResponse;
 import com.consulteer.shoppingstore.repositories.ProductRepository;
 import com.consulteer.shoppingstore.services.ProductService;
@@ -62,7 +62,7 @@ public class ProductController {
     }
 
     @GetMapping("/top")
-    public ResponseEntity<List<TopProductsDto>> findTopProducts() {
+    public ResponseEntity<List<TopProductDto>> findTopProducts() {
         return ResponseEntity.ok(productService.getTopProducts());
     }
 

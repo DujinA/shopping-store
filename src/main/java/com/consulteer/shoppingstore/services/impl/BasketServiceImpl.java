@@ -85,22 +85,6 @@ public class BasketServiceImpl implements BasketService {
         createNewBasketItem(product, addBasketItemDto, basket, basketItems);
     }
 
-    private void createNewBasketItem(Product product,
-                                     AddBasketItemDto addBasketItemDto,
-                                     Basket basket,
-                                     List<BasketItem> basketItems) {
-        BasketItem basketItem = new BasketItem();
-
-        basketItem.setName(product.getName());
-        basketItem.setPrice(product.getUnitPrice() * addBasketItemDto.quantity());
-        basketItem.setQuantity(addBasketItemDto.quantity());
-        basketItem.setProduct(product);
-        basketItem.setBasket(basket);
-        basketItemRepository.save(basketItem);
-
-        basketItems.add(basketItem);
-    }
-
     private void updateBasketItem(BasketItem basketItem,
                                   AddBasketItemDto addBasketItemDto,
                                   Product product) {
@@ -157,14 +141,6 @@ public class BasketServiceImpl implements BasketService {
         return new ApiResponse("Basket cleared successfully", true);
     }
 
-    private void emptyBasket(Basket basket) {
-        basketItemRepository.deleteAllByBasketId(basket.getId());
-
-        basket.setTotalPrice(0.00);
-        basket.setTotalItemsCount(0);
-        basketRepository.save(basket);
-    }
-
     @Override
     @Transactional
     public ApiResponse buyProducts(BuyProductsDto buyProductsDto) {
@@ -187,6 +163,22 @@ public class BasketServiceImpl implements BasketService {
         emptyBasket(basket);
 
         return new ApiResponse("Products bought successfully", true);
+    }
+
+    private void createNewBasketItem(Product product,
+                                     AddBasketItemDto addBasketItemDto,
+                                     Basket basket,
+                                     List<BasketItem> basketItems) {
+        BasketItem basketItem = new BasketItem();
+
+        basketItem.setName(product.getName());
+        basketItem.setPrice(product.getUnitPrice() * addBasketItemDto.quantity());
+        basketItem.setQuantity(addBasketItemDto.quantity());
+        basketItem.setProduct(product);
+        basketItem.setBasket(basket);
+        basketItemRepository.save(basketItem);
+
+        basketItems.add(basketItem);
     }
 
     private void createNewOrderItem(Order order, BasketItem basketItem) {
@@ -212,6 +204,14 @@ public class BasketServiceImpl implements BasketService {
         orderRepository.save(order);
 
         return order;
+    }
+
+    private void emptyBasket(Basket basket) {
+        basketItemRepository.deleteAllByBasketId(basket.getId());
+
+        basket.setTotalPrice(0.00);
+        basket.setTotalItemsCount(0);
+        basketRepository.save(basket);
     }
 
     private Double totalPrice(List<BasketItem> basketItems) {

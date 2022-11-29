@@ -2,7 +2,7 @@ package com.consulteer.shoppingstore.mapper;
 
 import com.consulteer.shoppingstore.domain.Product;
 import com.consulteer.shoppingstore.dtos.ProductDto;
-import com.consulteer.shoppingstore.dtos.TopProductsDto;
+import com.consulteer.shoppingstore.dtos.TopProductDto;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -23,8 +23,8 @@ public class ProductMapper {
                 productDto.unitsInStock());
     }
 
-    public TopProductsDto convertTopProducts(Product product) {
-        return new TopProductsDto(product.getName(),
+    public TopProductDto convertTopProducts(Product product) {
+        return new TopProductDto(product.getName(),
                 product.getUnitPrice(),
                 checkInStock(product));
     }
@@ -32,5 +32,12 @@ public class ProductMapper {
     private String checkInStock(Product product) {
         return product.getUnitsInStock() == 0 ? "OUT OF STOCK" : "IN STOCK";
 
+    }
+
+    public void updateBasicFields(ProductDto productDto, Product updatedProduct) {
+        updatedProduct.setName(productDto.name());
+        updatedProduct.setDescription(productDto.description());
+        updatedProduct.setUnitPrice(productDto.unitPrice());
+        updatedProduct.setUnitsInStock(productDto.unitsInStock());
     }
 }

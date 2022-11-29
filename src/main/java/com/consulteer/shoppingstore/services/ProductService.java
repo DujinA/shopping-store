@@ -2,7 +2,7 @@ package com.consulteer.shoppingstore.services;
 
 import com.consulteer.shoppingstore.dtos.ProductDto;
 import com.consulteer.shoppingstore.dtos.ReportDto;
-import com.consulteer.shoppingstore.dtos.TopProductsDto;
+import com.consulteer.shoppingstore.dtos.TopProductDto;
 import com.consulteer.shoppingstore.payloads.ApiResponse;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public interface ProductService {
 
     List<ProductDto> getNewProducts();
 
-    List<TopProductsDto> getTopProducts();
+    List<TopProductDto> getTopProducts();
 
     ReportDto getReport(Long productId);
 

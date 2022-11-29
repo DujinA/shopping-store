@@ -4,6 +4,7 @@ import com.consulteer.shoppingstore.domain.Basket;
 import com.consulteer.shoppingstore.domain.Role;
 import com.consulteer.shoppingstore.domain.User;
 import com.consulteer.shoppingstore.dtos.CreateUserDto;
+import com.consulteer.shoppingstore.dtos.UpdateUserDto;
 import com.consulteer.shoppingstore.dtos.UserDto;
 import com.consulteer.shoppingstore.exceptions.ResourceNotFoundException;
 import com.consulteer.shoppingstore.mapper.UserMapper;
@@ -78,27 +79,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto updateUserInfo(UserDto userDto, Long userId) {
+    public UserDto updateUserInfo(UpdateUserDto updateUserDto, Long userId) {
         User updatedUser = findUserById(userId);
 
-        updateBasicFields(userDto, updatedUser);
+        userMapper.updateBasicFields(updateUserDto, updatedUser);
         userRepository.save(updatedUser);
 
         return userMapper.convert(updatedUser);
     }
 
-    private static void updateBasicFields(UserDto userDto, User updatedUser) {
-        updatedUser.setUsername(userDto.username());
-        updatedUser.setFirstName(userDto.firstName());
-        updatedUser.setLastName(userDto.lastName());
-        updatedUser.setEmail(userDto.email());
-    }
-
     @Override
     @Transactional
     public ApiResponse deleteUser(Long userId) {
-        User user = findUserById(userId);
-        userRepository.delete(user);
+        userRepository.deleteById(userId);
 
         return new ApiResponse("User deleted successfully", true);
     }

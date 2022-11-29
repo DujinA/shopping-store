@@ -10,7 +10,7 @@ public class CityMapper {
         return new CityDto(cityReport.getCityName(),
                 cityReport.getSoldQuantity(),
                 getTotalIncome(cityReport.getSoldQuantity(), price)
-                );
+        );
     }
 
     private Double getTotalIncome(Integer sold, Double price) {

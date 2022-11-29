@@ -1,6 +1,7 @@
 package com.consulteer.shoppingstore.controllers;
 
 import com.consulteer.shoppingstore.dtos.CreateUserDto;
+import com.consulteer.shoppingstore.dtos.UpdateUserDto;
 import com.consulteer.shoppingstore.dtos.UserDto;
 import com.consulteer.shoppingstore.payloads.ApiResponse;
 import com.consulteer.shoppingstore.services.UserService;
@@ -44,8 +45,8 @@ public class UserController {
 
     @PreAuthorize("hasAnyRole('CUSTOMER', 'MANAGER')")
     @PutMapping("/{user-id}")
-    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto, @PathVariable("user-id") Long userId) {
-        return ResponseEntity.ok(userService.updateUserInfo(userDto, userId));
+    public ResponseEntity<UserDto> updateUser(@RequestBody UpdateUserDto updateUserDto, @PathVariable("user-id") Long userId) {
+        return ResponseEntity.ok(userService.updateUserInfo(updateUserDto, userId));
     }
 
     @PreAuthorize("hasAnyRole('CUSTOMER', 'MANAGER')")

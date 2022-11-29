@@ -5,7 +5,7 @@ import com.consulteer.shoppingstore.dtos.interfaces.ProductReport;
 import com.consulteer.shoppingstore.dtos.CityDto;
 import com.consulteer.shoppingstore.dtos.ProductDto;
 import com.consulteer.shoppingstore.dtos.ReportDto;
-import com.consulteer.shoppingstore.dtos.TopProductsDto;
+import com.consulteer.shoppingstore.dtos.TopProductDto;
 import com.consulteer.shoppingstore.exceptions.ResourceNotFoundException;
 import com.consulteer.shoppingstore.mapper.CityMapper;
 import com.consulteer.shoppingstore.mapper.ProductMapper;
@@ -46,12 +46,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDto> getNewProducts() {
-        List<Product> list = productRepository.findNewProduct();
+        List<Product> list = productRepository.findNewProducts();
         return list.stream().map(productMapper::convert).collect(Collectors.toList());
     }
 
     @Override
-    public List<TopProductsDto> getTopProducts() {
+    public List<TopProductDto> getTopProducts() {
         List<Product> list = productRepository.findTopProducts();
         return list.stream().map(productMapper::convertTopProducts).collect(Collectors.toList());
     }
@@ -87,24 +87,16 @@ public class ProductServiceImpl implements ProductService {
     public ProductDto updateProduct(ProductDto productDto, Long productId) {
         Product updatedProduct = findProductById(productId);
 
-        updateBasicFields(productDto, updatedProduct);
+        productMapper.updateBasicFields(productDto, updatedProduct);
         productRepository.save(updatedProduct);
 
         return productMapper.convert(updatedProduct);
     }
 
-    private static void updateBasicFields(ProductDto productDto, Product updatedProduct) {
-        updatedProduct.setName(productDto.name());
-        updatedProduct.setDescription(productDto.description());
-        updatedProduct.setUnitPrice(productDto.unitPrice());
-        updatedProduct.setUnitsInStock(productDto.unitsInStock());
-    }
-
     @Override
     @Transactional
     public ApiResponse deleteProduct(Long productId) {
-        Product product = findProductById(productId);
-        productRepository.delete(product);
+        productRepository.deleteById(productId);
 
         return new ApiResponse("Product deleted successfully", true);
     }

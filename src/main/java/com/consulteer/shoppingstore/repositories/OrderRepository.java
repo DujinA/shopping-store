@@ -12,7 +12,7 @@ import java.util.Date;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findAllByUserIdOrderByCreatedAtDesc(Long userId,
-                                Pageable pageable);
+                                                    Pageable pageable);
 
     @Query("SELECT o " +
             "FROM Order o " +

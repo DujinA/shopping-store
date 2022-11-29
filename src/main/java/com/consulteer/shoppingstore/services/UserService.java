@@ -1,6 +1,7 @@
 package com.consulteer.shoppingstore.services;
 
 import com.consulteer.shoppingstore.dtos.CreateUserDto;
+import com.consulteer.shoppingstore.dtos.UpdateUserDto;
 import com.consulteer.shoppingstore.dtos.UserDto;
 import com.consulteer.shoppingstore.payloads.ApiResponse;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,7 +15,7 @@ public interface UserService extends UserDetailsService {
 
     UserDto createUser(CreateUserDto createUserDto);
 
-    UserDto updateUserInfo(UserDto userDto, Long userId);
+    UserDto updateUserInfo(UpdateUserDto updateUserDto, Long userId);
 
     ApiResponse deleteUser(Long userId);
 }

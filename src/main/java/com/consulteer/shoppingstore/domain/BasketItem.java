@@ -35,6 +35,4 @@ public class BasketItem {
     @ManyToOne
     @JoinColumn(name = "basket_id", referencedColumnName = "id")
     private Basket basket;
-    
-    
 }
